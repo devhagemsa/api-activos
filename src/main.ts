@@ -6,9 +6,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const allowedOrigins = (
-    process.env.CORS_ORIGINS ?? 'http://localhost:3001,http://127.0.0.1:3001'
-  )
+  const allowedOrigins = "https://erp.hagemsa.com"
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -36,6 +34,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(8080);
 }
 bootstrap();

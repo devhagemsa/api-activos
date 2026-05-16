@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum TipoActivo {
+  VEHICULO
+  EQUIPO
+  HERRAMIENTA
+  DISPOSITIVO
+  OTRO
+}
+
+enum EstadoActivo {
+  ACTIVO
+  INACTIVO
+  SINIESTRADO
+}
+
+enum PlantillaInventario {
+  CAMION
+  REMOLCADOR
+  SEMIREMOLQUE
+  EQUIPO_LIVIANO
+}
+
+enum EstadoOperativo {
+  OPERATIVO
+  MANTENIMIENTO
+  NO_OPERATIVO
+}
+
+enum EstadoCalibracion {
+  CALIBRADA
+  NO_CALIBRADA
+  PENDIENTE
+  OBSERVADA
+}
+
+enum TipoDocumentoActivo {
+  TARJETA_PROPIEDAD
+  TARJETA_MERCANCIAS
+  SOAT
+  REVISION_TECNICA_12_MESES
+  REVISION_TECNICA_6_MESES
+  RESOLUCION_DIRECTORAL
+  RESOLUCION_GERENCIAL
+  IQBF
+  CERTIFICADO_MATPEL
+  CERTIFICADO_BONIFICACION
+  CERTIFICADO_OPERATIVIDAD
+  OTRO
+}
+
+enum EstadoDocumentoActivo {
+  VIGENTE
+  VENCIDO
+  PENDIENTE
+  OBSERVADO
+  NO_APLICA
+}
+
+enum TipoImagenActivo {
+  FRONTAL
+  LATERAL
+  POSTERIOR
+  INTERIOR
+  DOCUMENTO
+  OTRO
+}
+
+enum EstadoEquipamientoActivo {
+  INSTALADO
+  PENDIENTE
+  OBSERVADO
+  RETIRADO
+  NO_APLICA
+}
+
+model Activo {
+  id          String       @id @default(uuid())
+  codigo      String       @unique
+  tipoActivo  TipoActivo
+  descripcion String
+  ubicacion   String
+  estadoActivo EstadoActivo @default(ACTIVO)
+  observacion String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  vehiculoDetalle VehiculoDetalle?
+  historial        ActivoHistorial[]
+  documentos       DocumentoActivo[]
+  imagenes         ImagenActivo[]
+  equipamiento     EquipamientoActivo[]
+
+  @@map("activos")
+}
+
+model VehiculoDetalle {
+  id       String @id @default(uuid())
+  activoId String @unique
+  activo   Activo @relation(fields: [activoId], references: [id], onDelete: Cascade)
+
+  plantillaInventario PlantillaInventario
+
+  tarjetaPropiedad          String?
+  tarjetaMercancias         String?
+  soat                      String?
+  revisionTecnica12Meses    String?
+  revisionTecnica6Meses     String?
+  resolucionDirectoral      String?
+  resolucionGerencial       String?
+  iqbf                      String?
+  certificadoMatpel         String?
+  certificadoBonificacion   String?
+  certificadoOperatividad   String?
+
+  placaRodaje       String? @unique
+  anioFabricacion   Int?
+  color             String?
+  marca             String?
+  modelo            String?
+  carroceria        String?
+  ejes              Int?
+  categoria         String?
+  serieChasis       String? @unique
+  serieMotor        String? @unique
+
+  radioComunicacion     String?
+  autorradio            String?
+  llantasRepuesto       String?
+  camara                String?
+  tablet                String?
+  dispositivosSeguridad String?
+  estadoOperativo       EstadoOperativo @default(OPERATIVO)
+  cajaHerramientas      String?
+  jaulaAntivuelco       String?
+  carriboy              String?
+  baranda               String?
+  mamparon              String?
+
+  ancho          Decimal?
+  longitud       Decimal?
+  alto           Decimal?
+  tipoSuspension String?
+  tipoTornamesa  String?
+
+  capacidadTanqueGalones Decimal?
+  estadoCalibracion      EstadoCalibracion @default(PENDIENTE)
+  factorCorreccion       Decimal?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("vehiculos_detalle")
+}
+
+model ActivoHistorial {
+  id            String   @id @default(uuid())
+  activoId      String
+  activo        Activo   @relation(fields: [activoId], references: [id], onDelete: Cascade)
+  tipoCambio    String
+  valorAnterior String?
+  valorNuevo    String?
+  motivo        String?
+  usuario       String?
+  createdAt     DateTime @default(now())
+
+  @@map("activos_historial")
+}
+
+model DocumentoActivo {
+  id               String                @id @default(uuid())
+  activoId         String
+  activo           Activo                @relation(fields: [activoId], references: [id], onDelete: Cascade)
+  tipoDocumento    TipoDocumentoActivo
+  estadoDocumento  EstadoDocumentoActivo @default(PENDIENTE)
+  numero           String?
+  fechaEmision     DateTime?
+  fechaVencimiento DateTime?
+  archivoUrl       String?
+  observacion      String?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([activoId, tipoDocumento])
+  @@map("documentos_activo")
+}
+
+model ImagenActivo {
+  id          String           @id @default(uuid())
+  activoId    String
+  activo      Activo           @relation(fields: [activoId], references: [id], onDelete: Cascade)
+  tipoImagen  TipoImagenActivo @default(OTRO)
+  url         String
+  descripcion String?
+  orden       Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([activoId, tipoImagen])
+  @@map("imagenes_activo")
+}
+
+model EquipamientoActivo {
+  id          String                   @id @default(uuid())
+  activoId    String
+  activo      Activo                   @relation(fields: [activoId], references: [id], onDelete: Cascade)
+  nombre      String
+  estado      EstadoEquipamientoActivo @default(PENDIENTE)
+  descripcion String?
+  observacion String?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  @@index([activoId, nombre])
+  @@map("equipamiento_activo")
+}

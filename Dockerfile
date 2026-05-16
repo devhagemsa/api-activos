@@ -42,6 +42,8 @@ COPY --from=production-deps /app/node_modules ./node_modules
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/dist ./dist
 
+RUN chown -R nestjs:nodejs /app
+
 USER nestjs
 
 EXPOSE 8080

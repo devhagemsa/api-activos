@@ -49,7 +49,7 @@ import { EquipamientoActivo } from '../../domain/entities/equipamiento-activo.en
 import { ImagenActivo } from '../../domain/entities/imagen-activo.entity';
 
 @ApiTags('Activos')
-@Controller('activos')
+@Controller(['activos', 'api/activos'])
 export class ActivosController {
   constructor(
     private readonly crearActivoUseCase: CrearActivoUseCase,
